@@ -95,6 +95,32 @@ nav button.on{color:#FFFFFF;background:rgba(255,255,255,.13);box-shadow:0 2px 8p
 #toast.on{opacity:1}
 @media(prefers-reduced-motion:reduce){#toast{transition:none}}
 @media(max-width:480px){body{padding-left:72px}nav{width:72px}nav button{font-size:11px}.wrap{padding:0 10px}}
+
+/* TAMBAHAN: rata-rata nilai & cari banyak siswa */
+.pc{display:inline-flex;align-items:center;gap:4px;border:1.5px solid var(--edge);border-radius:20px;padding:8px 12px;margin:0 6px 8px 0;background:var(--glass);color:var(--soft);font:inherit;font-size:14px;cursor:pointer;text-align:left}
+.pc small{opacity:.8}
+.pc.on{background:#31527D;color:#fff;border-color:transparent}
+.sc{border:1px solid var(--edge);border-radius:14px;padding:12px;margin-top:12px;background:rgba(255,255,255,.04)}
+.sc h3{margin:0 0 4px;font-size:17px;color:var(--dark)}
+.sc h3 small{font-weight:500;color:var(--soft);font-size:13px}
+.sc h4{margin:14px 0 6px;font-size:14px;color:var(--soft)}
+#avgLiveN{margin:12px 0 0;padding:10px 12px;border:1px solid var(--edge);border-radius:12px;background:rgba(255,255,255,.05);font-size:14px;color:var(--ink)}
+#tblRataNilai h3{margin:0 0 4px;font-size:16px;color:var(--dark)}
+#tblRataNilai table td b{font-size:16px}
+#cariC{min-height:76px}
+@media print{
+  #nilaiPrintArea h3{color:#111!important}
+  body.print-cari *{visibility:hidden!important}
+  body.print-cari #cariPrintArea,body.print-cari #cariPrintArea *{visibility:visible!important}
+  body.print-cari #cariPrintArea{position:absolute!important;left:0!important;top:0!important;width:100%!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:#fff!important;color:#111!important;box-shadow:none!important}
+  body.print-cari #cariPrintArea h2,body.print-cari #cariPrintArea h3,body.print-cari #cariPrintArea h4,body.print-cari #cariPrintArea .hint{color:#111!important}
+  body.print-cari #cariPrintArea table{width:100%!important;min-width:0!important;border-collapse:collapse!important;font-size:9pt!important}
+  body.print-cari #cariPrintArea th,body.print-cari #cariPrintArea td{color:#111!important;background:#fff!important;border:1px solid #777!important;padding:4px!important;white-space:normal!important}
+  body.print-cari #cariPrintArea th{background:#e9edf2!important;font-weight:700!important}
+  body.print-cari #cariPrintArea .sc{background:#fff!important;border:1px solid #777!important;break-inside:avoid-page}
+  body.print-cari #cariPrintArea .chip{background:#fff!important;border:1px solid #bbb!important}
+  body.print-cari #cariPrintArea .chip:not([style]){color:#111!important}
+}
 </style>
 </head>
 <body>
@@ -155,6 +181,7 @@ nav button.on{color:#FFFFFF;background:rgba(255,255,255,.13);box-shadow:0 2px 8p
   <div class="card">
     <div class="two"><input id="nilSama" type="number" min="0" max="100" placeholder="Nilai sama, cth: 80"><button class="btn o" id="applyN" style="width:auto">Terapkan</button></div>
     <div id="listN"></div>
+    <div id="avgLiveN">Rata-rata akan muncul setelah nilai diisi.</div>
     <button class="btn" id="saveN">💾 Simpan Nilai</button>
   </div>
   <div class="card" id="nilaiReportCard">
@@ -169,6 +196,7 @@ nav button.on{color:#FFFFFF;background:rgba(255,255,255,.13);box-shadow:0 2px 8p
     <div id="nilaiPrintArea">
       <h2 id="judulLaporanNilai">Laporan Semua Nilai</h2>
       <div class="hint" id="metaLaporanNilai"></div>
+      <div class="tw" id="tblRataNilai" style="margin-bottom:16px"></div>
       <div class="tw" id="tblNilaiSemua"></div>
     </div>
   </div>
@@ -187,6 +215,28 @@ nav button.on{color:#FFFFFF;background:rgba(255,255,255,.13);box-shadow:0 2px 8p
   <div class="card" id="rekapPrintArea"><h2 id="judulRekapPrint">Rekap Kelas</h2><div class="hint" id="metaRekapPrint"></div><div class="tw" id="tblK"></div></div>
 </section>
 
+<section class="view" id="v-cari">
+  <div class="card"><h2>🔍 Cari Banyak Siswa</h2>
+    <label for="cariC">Ketik nama siswa (boleh banyak)</label>
+    <textarea id="cariC" autocomplete="off" placeholder="Contoh: andi, budi, siti&#10;Pisahkan dengan koma atau baris baru. Sebagian nama juga bisa."></textarea>
+    <div class="hint">Semua siswa yang namanya cocok dengan salah satu kata akan muncul. Ketuk nama di bawah untuk memilih / membatalkan.</div>
+    <label for="selC">Kelas</label><select id="selC"></select>
+    <label for="mapelC">Mata pelajaran</label><select id="mapelC"></select>
+  </div>
+  <div class="card" id="pilihCard">
+    <h2>👥 Siswa Ditemukan</h2>
+    <div class="hint" id="infoC" style="margin:0 0 10px">Ketik nama untuk mulai mencari.</div>
+    <div id="pilihC"></div>
+    <div class="two" id="aksiC" style="display:none;margin-top:6px"><button class="btn g" id="pilihSemuaC">✓ Pilih semua</button><button class="btn g" id="kosongC">✕ Kosongkan pilihan</button></div>
+    <div class="two" style="margin-top:10px"><button class="btn o" id="downloadCariExcel">⬇️ Download Excel</button><button class="btn" id="printCari">🖨️ Cetak / Simpan PDF</button></div>
+  </div>
+  <div class="card" id="cariPrintArea">
+    <h2 id="judulCari">Nilai &amp; Daftar Hadir Siswa</h2>
+    <div class="hint" id="metaCari"></div>
+    <div id="hasilC"></div>
+  </div>
+</section>
+
 </div>
 
 <nav>
@@ -195,6 +245,7 @@ nav button.on{color:#FFFFFF;background:rgba(255,255,255,.13);box-shadow:0 2px 8p
   <button data-v="nilai"><span>💯</span>Nilai</button>
   <button data-v="riwayat"><span>🕓</span>Riwayat</button>
   <button data-v="rekap"><span>📊</span>Rekap</button>
+  <button data-v="cari"><span>🔍</span>Cari</button>
 </nav>
 <div id="toast"></div>
 
@@ -255,7 +306,7 @@ function fillSelects(keep){
 function go(v){
   document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id==='v-'+v));
   document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
-  ({absen:loadA,murid:renderM,nilai:loadN,riwayat:renderR,rekap:renderK})[v]();
+  ({absen:loadA,murid:renderM,nilai:loadN,riwayat:renderR,rekap:renderK,cari:loadC})[v]();
   scrollTo(0,0);
 }
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>go(b.dataset.v));
@@ -427,6 +478,7 @@ function renderGradeReport(){
   $('#metaLaporanNilai').textContent='Mata pelajaran: '+(sel.value==='*'?'Semua mata pelajaran':mapelLabel(sel.value))+' · '+rows.length+' data nilai · Dicetak '+fmt(today());
   $('#infoNilaiReport').textContent=rows.length+' nilai tersimpan untuk '+k+'. Gunakan filter untuk melihat mata pelajaran tertentu.';
   $('#tblNilaiSemua').innerHTML=rows.length?'<table><thead><tr><th>No.</th><th>Nama Murid</th><th>Mata Pelajaran</th><th>Pertemuan</th><th>Tanggal</th><th>Nilai</th></tr></thead><tbody>'+rows.map((r,i)=>`<tr><td>${i+1}</td><td>${esc(r.nama)}</td><td>${esc(r.mapel)}</td><td>${esc(r.pertemuan)}</td><td>${r.tanggal?fmt(r.tanggal):'-'}</td><td><strong>${esc(r.nilai)}</strong></td></tr>`).join('')+'</tbody></table>':'<div class="empty"><i>💯</i>Belum ada nilai tersimpan untuk pilihan ini.</div>';
+  renderAvgSummary();
 }
 $('#filterMapelN').onchange=renderGradeReport;
 $('#downloadNilaiExcel').onclick=()=>{
@@ -437,6 +489,9 @@ $('#downloadNilaiExcel').onclick=()=>{
   const ws=XLSX.utils.json_to_sheet(data),wb=XLSX.utils.book_new();
   ws['!cols']=[{wch:6},{wch:14},{wch:28},{wch:24},{wch:12},{wch:16},{wch:10}];
   XLSX.utils.book_append_sheet(wb,ws,'Semua Nilai');
+  const avgData=avgNilaiRows().map((r,i)=>({'No':i+1,'Kelas':r.kelas,'Nama Murid':r.nama,'Jumlah Nilai':r.jumlah,'Rata-rata':r.rata==null?'-':Number(r.rata.toFixed(1)),'Terendah':r.min==null?'-':r.min,'Tertinggi':r.max==null?'-':r.max}));
+  const wsAvg=XLSX.utils.json_to_sheet(avgData);wsAvg['!cols']=[{wch:6},{wch:14},{wch:28},{wch:14},{wch:12},{wch:10},{wch:10}];
+  XLSX.utils.book_append_sheet(wb,wsAvg,'Rata-rata');
   const safeClass=$('#selN').value.replace(/[^a-z0-9_-]+/gi,'_');
   XLSX.writeFile(wb,'Nilai_'+safeClass+'_'+today()+'.xlsx');
   toast('File Excel berhasil dibuat ✓');
@@ -558,6 +613,111 @@ $('#printRekap').onclick=()=>{
   document.body.classList.add('print-rekap');window.addEventListener('afterprint',()=>{document.body.classList.remove('print-rekap');document.title=title},{once:true});window.print();
 };
 $('#selK').onchange=renderK;$('#mapelK').onchange=renderK;
+
+/* RATA-RATA NILAI (tab Nilai) */
+function avgNilaiRows(){
+  const k=$('#selN').value,f=$('#filterMapelN').value;
+  const gs=Object.values(G).filter(g=>g.kelas===k&&(f==='*'||(g.mapel||'')===f));
+  return (S[k]||[]).map(s=>{
+    const v=gs.map(g=>g.data&&g.data[s.id]).filter(x=>x!=null).map(Number);
+    return {kelas:k,nama:s.name,jumlah:v.length,rata:v.length?v.reduce((a,b)=>a+b,0)/v.length:null,min:v.length?Math.min(...v):null,max:v.length?Math.max(...v):null};
+  });
+}
+function renderAvgSummary(){
+  const rows=avgNilaiRows(),ada=rows.filter(r=>r.rata!=null);
+  const kelasAvg=ada.length?(ada.reduce((a,r)=>a+r.rata,0)/ada.length).toFixed(1):'-';
+  $('#tblRataNilai').innerHTML=ada.length
+    ?`<h3>Rata-rata Nilai per Murid</h3><div class="hint" style="margin:0 0 8px">Rata-rata kelas: <b>${kelasAvg}</b> · dihitung otomatis dari semua nilai yang sudah tersimpan</div><table><thead><tr><th>Nama Murid</th><th>Jumlah Nilai</th><th>Rata-rata</th><th>Terendah</th><th>Tertinggi</th></tr></thead><tbody>`+rows.map(r=>`<tr><td>${esc(r.nama)}</td><td>${r.jumlah}</td><td><b>${r.rata==null?'-':r.rata.toFixed(1)}</b></td><td>${r.min==null?'-':r.min}</td><td>${r.max==null?'-':r.max}</td></tr>`).join('')+'</tbody></table>'
+    :'';
+  updateLiveAvg();
+}
+function updateLiveAvg(){
+  const k=$('#selN').value,mp=$('#mapelN').value,m=String($('#mtg').value||''),l=S[k]||[];
+  const g=editingGradeKey&&G[editingGradeKey]?G[editingGradeKey]:G[rk(k,mp,m)];
+  const d={...(g&&g.data?g.data:{})};
+  document.querySelectorAll('#listN .row').forEach(r=>{const v=r.querySelector('.nl').value;if(v==='')delete d[r.dataset.id];else d[r.dataset.id]=Math.min(100,Math.max(0,Number(v)))});
+  const ids=new Set(l.map(s=>s.id)),v=Object.entries(d).filter(([id,x])=>ids.has(id)&&x!=null).map(([,x])=>Number(x));
+  $('#avgLiveN').innerHTML=v.length?`📈 Rata-rata kelas pertemuan ini: <b>${(v.reduce((a,b)=>a+b,0)/v.length).toFixed(1)}</b> · ${v.length} dari ${l.length} murid sudah dinilai`:'Rata-rata akan muncul setelah nilai diisi.';
+}
+$('#listN').addEventListener('input',updateLiveAvg);
+$('#applyN').addEventListener('click',updateLiveAvg);
+
+/* CARI BANYAK SISWA: nilai + daftar hadir */
+let uncheckedC=new Set();
+const termsC=()=>$('#cariC').value.split(/[\n,;]+/).map(x=>x.trim().toLowerCase()).filter(Boolean);
+function matchC(){
+  const terms=termsC();if(!terms.length)return [];
+  const kf=$('#selC').value,out=[];
+  (kf?[kf]:kelasList()).forEach(k=>(S[k]||[]).forEach(s=>{const n=s.name.toLowerCase();if(terms.some(t=>n.includes(t)))out.push({k,s})}));
+  return out;
+}
+const pickedC=()=>matchC().filter(x=>!uncheckedC.has(x.s.id));
+function dataC(k,s,mp){
+  const okm=x=>x.kelas===k&&(mp==='*'||(x.mapel||'')===mp);
+  const nilai=[],hadir=[];
+  Object.values(G).filter(okm).sort((a,b)=>String(a.mapel||'').localeCompare(String(b.mapel||''),'id')||(Number(a.meeting)-Number(b.meeting)))
+    .forEach(g=>{if(g.data&&g.data[s.id]!=null)nilai.push({mapel:mapelLabel(g.mapel),pertemuan:g.meeting,tanggal:g.date||'',nilai:Number(g.data[s.id])})});
+  Object.values(R).filter(okm).sort((a,b)=>a.date.localeCompare(b.date))
+    .forEach(r=>{if(r.data&&r.data[s.id])hadir.push({mapel:mapelLabel(r.mapel),tanggal:r.date,status:r.data[s.id]})});
+  const n={H:0,I:0,S:0,A:0};hadir.forEach(h=>n[h.status]++);
+  const avg=nilai.length?(nilai.reduce((a,b)=>a+b.nilai,0)/nilai.length).toFixed(1):'-';
+  return {nilai,hadir,n,avg,persen:hadir.length?Math.round(n.H/hadir.length*100)+'%':'-'};
+}
+function loadC(){
+  const kv=$('#selC').value;
+  $('#selC').innerHTML='<option value="">Semua kelas</option>'+kelasList().filter(k=>(S[k]||[]).length).map(k=>`<option>${esc(k)}</option>`).join('');
+  if([...$('#selC').options].some(o=>o.value===kv))$('#selC').value=kv;
+  fillMapel($('#mapelC'),$('#selC').value,true);
+  renderC();
+}
+function renderC(){
+  const m=matchC(),mp=$('#mapelC').value,sel=m.filter(x=>!uncheckedC.has(x.s.id)),terms=termsC();
+  $('#infoC').textContent=terms.length?`${m.length} siswa cocok · ${sel.length} dipilih`:'Ketik nama untuk mulai mencari.';
+  $('#aksiC').style.display=m.length?'flex':'none';
+  $('#pilihC').innerHTML=m.map(x=>{const on=!uncheckedC.has(x.s.id);return `<button type="button" class="pc ${on?'on':''}" data-id="${x.s.id}">${on?'✓ ':''}${esc(x.s.name)} <small>· ${esc(x.k)}</small></button>`}).join('');
+  $('#judulCari').textContent='Nilai & Daftar Hadir Siswa';
+  $('#metaCari').textContent=sel.length?`${sel.length} siswa · Mata pelajaran: ${mp==='*'?'Semua mata pelajaran':mapelLabel(mp)} · ${fmt(today())}`:'';
+  if(!sel.length){
+    $('#hasilC').innerHTML=`<div class="empty"><i>🔍</i>${terms.length?(m.length?'Belum ada siswa yang dipilih.':'Nama tidak ditemukan.'):'Ketik satu atau beberapa nama untuk menampilkan nilai dan daftar hadir.'}</div>`;return;
+  }
+  $('#hasilC').innerHTML=sel.map(({k,s})=>{
+    const d=dataC(k,s,mp);
+    const chips=`<div class="chips" style="grid-template-columns:repeat(3,1fr);margin-top:8px"><div class="chip"><b>${d.avg}</b>Rata nilai</div>`+['H','I','S','A'].map(c=>`<div class="chip" style="color:var(--${c})"><b>${d.n[c]}</b>${LBL[c]}</div>`).join('')+`<div class="chip"><b>${d.persen}</b>% Hadir</div></div>`;
+    const tn=d.nilai.length?`<div class="tw"><table><thead><tr><th>Mata Pelajaran</th><th>Pertemuan</th><th>Tanggal</th><th>Nilai</th></tr></thead><tbody>`+d.nilai.map(x=>`<tr><td>${esc(x.mapel)}</td><td>${esc(x.pertemuan)}</td><td>${x.tanggal?fmt(x.tanggal):'-'}</td><td><strong>${esc(x.nilai)}</strong></td></tr>`).join('')+'</tbody></table></div>':'<div class="hint">Belum ada nilai tersimpan.</div>';
+    const th=d.hadir.length?`<div class="tw"><table><thead><tr><th>Tanggal</th><th>Mata Pelajaran</th><th>Status</th></tr></thead><tbody>`+d.hadir.map(x=>`<tr><td>${fmt(x.tanggal)}</td><td>${esc(x.mapel)}</td><td><span class="badge" style="background:var(--${x.status})">${LBL[x.status]}</span></td></tr>`).join('')+'</tbody></table></div>':'<div class="hint">Belum ada data kehadiran.</div>';
+    return `<div class="sc"><h3>${esc(s.name)} <small>· ${esc(k)}</small></h3>${chips}<h4>💯 Nilai (${d.nilai.length})</h4>${tn}<h4>📋 Daftar Hadir (${d.hadir.length})</h4>${th}</div>`;
+  }).join('');
+}
+$('#cariC').addEventListener('input',renderC);
+$('#selC').onchange=()=>{fillMapel($('#mapelC'),$('#selC').value,true);renderC()};
+$('#mapelC').onchange=renderC;
+$('#pilihC').onclick=e=>{
+  const b=e.target.closest('.pc');if(!b)return;
+  const id=b.dataset.id;if(uncheckedC.has(id))uncheckedC.delete(id);else uncheckedC.add(id);renderC();
+};
+$('#pilihSemuaC').onclick=()=>{uncheckedC.clear();renderC()};
+$('#kosongC').onclick=()=>{matchC().forEach(x=>uncheckedC.add(x.s.id));renderC()};
+$('#downloadCariExcel').onclick=()=>{
+  const p=pickedC();if(!p.length)return toast('Belum ada siswa yang dipilih');
+  if(typeof XLSX==='undefined')return toast('Fitur Excel belum termuat. Periksa koneksi internet.');
+  const mp=$('#mapelC').value,Rg=[],N=[],H=[];
+  p.forEach(({k,s})=>{
+    const d=dataC(k,s,mp);
+    Rg.push({'Kelas':k,'Nama Murid':s.name,'Rata Nilai':d.avg==='-'?'-':Number(d.avg),'Hadir':d.n.H,'Izin':d.n.I,'Sakit':d.n.S,'Alpa':d.n.A,'% Hadir':d.persen});
+    d.nilai.forEach(x=>N.push({'Kelas':k,'Nama Murid':s.name,'Mata Pelajaran':x.mapel,'Pertemuan':x.pertemuan,'Tanggal':x.tanggal,'Nilai':x.nilai}));
+    d.hadir.forEach(x=>H.push({'Kelas':k,'Nama Murid':s.name,'Mata Pelajaran':x.mapel,'Tanggal':x.tanggal,'Status':LBL[x.status]}));
+  });
+  const wb=XLSX.utils.book_new();
+  [['Ringkasan',Rg],['Nilai',N],['Kehadiran',H]].forEach(([n,a])=>{const ws=XLSX.utils.json_to_sheet(a.length?a:[{'Info':'Tidak ada data'}]);ws['!cols']=[{wch:14},{wch:28},{wch:22},{wch:14},{wch:16},{wch:12},{wch:10},{wch:10}];XLSX.utils.book_append_sheet(wb,ws,n)});
+  XLSX.writeFile(wb,'Nilai_Hadir_Siswa_'+today()+'.xlsx');toast('File Excel berhasil dibuat ✓');
+};
+$('#printCari').onclick=()=>{
+  if(!pickedC().length)return toast('Belum ada siswa yang dipilih');
+  const title=document.title;document.title='Nilai_Hadir_Siswa';
+  document.body.classList.add('print-cari');
+  window.addEventListener('afterprint',()=>{document.body.classList.remove('print-cari');document.title=title},{once:true});
+  window.print();
+};
 
 /* MULAI */
 $('#tglA').value=today();
